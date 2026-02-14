@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Property VDB
+
+An internal property search and data visualisation tool. Browse property deals, view listings on an interactive map, and export data — all in one place.
+
+> **Internal use only** — not intended for public-facing deployment.
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Version |
+|---|---|---|
+| **Framework** | [Next.js](https://nextjs.org) (App Router) | 16 |
+| **Language** | TypeScript | 5 |
+| **UI Library** | React | 19 |
+| **Styling** | Tailwind CSS | 4 |
+| **Animations** | Framer Motion | 12 |
+| **Icons** | Lucide React | — |
+| **Maps** | MapLibre GL + React Map GL | — |
+| **Theming** | next-themes | — |
+| **UI Primitives** | Radix UI (react-slot) | — |
+| **Utilities** | clsx, tailwind-merge, class-variance-authority | — |
+| **Linting** | ESLint (eslint-config-next) | 9 |
+| **Deployment** | Vercel | — |
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/                  # Next.js App Router pages
+│   ├── layout.tsx        # Root layout (fonts, theme provider)
+│   ├── page.tsx          # Home / dashboard
+│   ├── globals.css       # Global styles & Tailwind config
+│   ├── deals/            # Property deals page
+│   ├── map/              # Interactive map view
+│   └── search/           # Property search page
+├── components/           # Reusable UI components
+│   ├── MapboxMap.tsx      # Map component (MapLibre GL)
+│   ├── header.tsx         # App header / navigation
+│   ├── footer.tsx         # App footer
+│   ├── property-card.tsx  # Property listing card
+│   ├── search-input.tsx   # Search input field
+│   ├── export-button.tsx  # CSV/data export
+│   ├── theme-provider.tsx # Dark/light theme wrapper
+│   ├── theme-toggle.tsx   # Theme switcher button
+│   └── ui/               # Shared primitives (button, etc.)
+└── lib/                  # Shared utilities
+    ├── api.ts            # API helper functions
+    └── utils.ts          # General utility functions
+```
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- **Node.js** ≥ 18
+- **npm** (bundled with Node)
+
+### Install & Run
 
 ```bash
+# Install dependencies
+npm install
+
+# Start the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Other Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | Description |
+|---|---|
+| `npm run build` | Create a production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Run ESLint checks |
