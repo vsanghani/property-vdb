@@ -62,7 +62,12 @@
           "search": ""
         }
       ],
-      "remotePatterns": [],
+      "remotePatterns": [
+        {
+          "protocol": "https",
+          "hostname": "images.unsplash.com"
+        }
+      ],
       "qualities": [
         75
       ],
@@ -99,7 +104,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "/Users/vsanghani/_GitHub/property_vdb",
+    "outputFileTracingRoot": "/Users/vsanghani/_GitHub/property-vdb",
     "cacheComponents": false,
     "cacheLife": {
       "default": {
@@ -292,11 +297,11 @@
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.ts",
     "turbopack": {
-      "root": "/Users/vsanghani/_GitHub/property_vdb"
+      "root": "/Users/vsanghani/_GitHub/property-vdb"
     },
     "distDirRoot": ".next"
   },
-  "appDir": "/Users/vsanghani/_GitHub/property_vdb",
+  "appDir": "/Users/vsanghani/_GitHub/property-vdb",
   "relativeAppDir": "",
   "files": [
     ".next/routes-manifest.json",

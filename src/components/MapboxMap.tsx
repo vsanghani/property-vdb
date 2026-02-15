@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Map, { Marker, Popup, NavigationControl, FullscreenControl } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Property } from "@/lib/api";
@@ -11,9 +11,46 @@ interface MapboxMapProps {
     properties: Property[];
 }
 
+/**
+ * Compute bounds [minLng, minLat, maxLng, maxLat] for a set of properties.
+ * Returns a viewport that fits all markers with comfortable padding.
+ */
+function computeViewport(properties: Property[]) {
+    if (properties.length === 0) {
+        return { latitude: -42.8821, longitude: 147.3272, zoom: 13, pitch: 45 };
+    }
+
+    const lats = properties.map((p) => p.coordinates.lat);
+    const lngs = properties.map((p) => p.coordinates.lng);
+
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLng = (minLng + maxLng) / 2;
+
+    // Approximate zoom from the lat/lng spread
+    const latSpread = maxLat - minLat;
+    const lngSpread = maxLng - minLng;
+    const spread = Math.max(latSpread, lngSpread);
+
+    let zoom = 13;
+    if (spread > 0.08) zoom = 11;
+    else if (spread > 0.04) zoom = 12;
+    else if (spread > 0.02) zoom = 13;
+    else if (spread > 0.005) zoom = 14;
+    else zoom = 15;
+
+    return { latitude: centerLat, longitude: centerLng, zoom, pitch: 45 };
+}
+
 export default function MapboxMap({ properties }: MapboxMapProps) {
     const [mounted, setMounted] = useState(false);
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+
+    const viewport = useMemo(() => computeViewport(properties), [properties]);
 
     useEffect(() => {
         setMounted(true);
@@ -24,14 +61,8 @@ export default function MapboxMap({ properties }: MapboxMapProps) {
     return (
         <div className="h-[600px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative group">
             <Map
-                initialViewState={{
-                    longitude: 147.3272,
-                    latitude: -42.8821,
-                    zoom: 13,
-                    pitch: 45, // 3D effect
-                }}
+                initialViewState={viewport}
                 style={{ width: "100%", height: "100%" }}
-                // Use CartoDB Dark Matter GL style - Free, Open Source, Premium Dark Look
                 mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
             >
                 <NavigationControl position="top-right" />
@@ -67,7 +98,9 @@ export default function MapboxMap({ properties }: MapboxMapProps) {
                     >
                         <div className="glass-panel p-4 rounded-xl min-w-[240px] text-left">
                             <h3 className="font-bold text-lg text-foreground mb-1">{selectedProperty.address.street}</h3>
-                            <p className="text-sm text-muted-foreground mb-3">{selectedProperty.address.suburb}</p>
+                            <p className="text-sm text-muted-foreground mb-3">
+                                {selectedProperty.address.suburb}, {selectedProperty.address.state} {selectedProperty.address.postcode}
+                            </p>
 
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex flex-col">
@@ -79,17 +112,17 @@ export default function MapboxMap({ properties }: MapboxMapProps) {
                             </div>
 
                             <Link
-                                href={`/search?q=${encodeURIComponent(selectedProperty.address.street)}`}
+                                href={`/search?q=${encodeURIComponent(selectedProperty.address.suburb)}`}
                                 className="block w-full text-center py-2 px-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium text-sm transition-colors border border-primary/20"
                             >
-                                View Analytics
+                                View {selectedProperty.address.suburb} Properties
                             </Link>
                         </div>
                     </Popup>
                 )}
             </Map>
 
-            {/* Overlay gradient for seamless blending if needed */}
+            {/* Overlay gradient for seamless blending */}
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
         </div>
     );
