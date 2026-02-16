@@ -1,13 +1,18 @@
 import { SearchInput } from "@/components/search-input";
 import MapboxMap from "@/components/MapboxMap";
-import { getRecentDeals } from "@/lib/api";
+import { getRecentDeals, getSuburbStats } from "@/lib/api";
+import { HOBART_SUBURBS } from "@/lib/data";
 import { PropertyCard } from "@/components/property-card";
-import { ArrowRight, Map as MapIcon, TrendingUp, ShieldCheck } from "lucide-react";
+import { ArrowRight, Map as MapIcon, TrendingUp, ShieldCheck, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
 export default async function Home() {
     const recentProperties = await getRecentDeals();
+    const suburbData = HOBART_SUBURBS.map((suburb) => ({
+        suburb,
+        stats: getSuburbStats(suburb),
+    })).filter((s) => s.stats !== null);
 
     return (
         <div className="flex flex-col gap-12">
@@ -97,6 +102,44 @@ export default async function Home() {
                     description="Sourced directly from reliable government databases and recent sales records."
                 />
             </section>
+
+            {/* Suburb Comparison Table */}
+            <section className="w-full max-w-5xl mx-auto pb-12">
+                <div className="flex items-center gap-2 mb-6 px-1">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                    <h2 className="text-2xl font-bold font-outfit">Suburb Comparison</h2>
+                </div>
+                <div className="glass-card rounded-xl overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-border/50">
+                                    <th className="text-left px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Suburb</th>
+                                    <th className="text-right px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Median Price</th>
+                                    <th className="text-right px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Listings</th>
+                                    <th className="text-right px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Price Range</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {suburbData.map(({ suburb, stats }) => (
+                                    <tr key={suburb} className="border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors">
+                                        <td className="px-5 py-3.5">
+                                            <Link href={`/search?q=${encodeURIComponent(suburb)}`} className="font-medium text-primary hover:underline">
+                                                {suburb}
+                                            </Link>
+                                        </td>
+                                        <td className="text-right px-5 py-3.5 font-semibold">${stats!.medianPrice.toLocaleString()}</td>
+                                        <td className="text-right px-5 py-3.5 text-muted-foreground">{stats!.totalListings}</td>
+                                        <td className="text-right px-5 py-3.5 text-muted-foreground">
+                                            ${(stats!.priceRange.low / 1000).toFixed(0)}k – ${(stats!.priceRange.high / 1000).toFixed(0)}k
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 }
@@ -112,3 +155,4 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
         </div>
     );
 }
+
