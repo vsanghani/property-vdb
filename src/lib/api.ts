@@ -44,14 +44,25 @@ export interface SuburbStats {
   priceRange: { low: number; high: number };
 }
 
-/**
- * Search properties by matching query against street, suburb, or postcode.
- * Case-insensitive partial match.
- */
-export async function searchProperties(query: string): Promise<Property[]> {
-  // Simulate a small network delay for realism
-  await new Promise((resolve) => setTimeout(resolve, 200));
+// ── Async versions (legacy, still used by server components) ────────
 
+export async function searchProperties(query: string): Promise<Property[]> {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  return searchPropertiesSync(query);
+}
+
+export async function getRecentDeals(): Promise<Property[]> {
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  return getRecentDealsSync();
+}
+
+export async function getPropertyById(id: string): Promise<Property | null> {
+  return getPropertyByIdSync(id);
+}
+
+// ── Sync versions (for client components — no delay) ────────────────
+
+export function searchPropertiesSync(query: string): Property[] {
   if (!query.trim()) return HOBART_PROPERTIES;
 
   const q = query.toLowerCase().trim();
@@ -64,12 +75,7 @@ export async function searchProperties(query: string): Promise<Property[]> {
   });
 }
 
-/**
- * Return the 8 most recently sold properties (by last sale date).
- */
-export async function getRecentDeals(): Promise<Property[]> {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
+export function getRecentDealsSync(): Property[] {
   const sorted = [...HOBART_PROPERTIES].sort((a, b) => {
     const dateA = new Date(a.saleHistory[0].date).getTime();
     const dateB = new Date(b.saleHistory[0].date).getTime();
@@ -79,17 +85,16 @@ export async function getRecentDeals(): Promise<Property[]> {
   return sorted.slice(0, 8);
 }
 
-/**
- * Look up a single property by its ID.
- */
-export async function getPropertyById(id: string): Promise<Property | null> {
+export function getPropertyByIdSync(id: string): Property | null {
   return HOBART_PROPERTIES.find((p) => p.id === id) ?? null;
 }
 
-/**
- * Compute suburb-level stats: median price, total listings, price range.
- * Returns null if no properties match the given suburb.
- */
+export function getAllProperties(): Property[] {
+  return HOBART_PROPERTIES;
+}
+
+// ── Stats & suggestions ─────────────────────────────────────────────
+
 export function getSuburbStats(suburbQuery: string): SuburbStats | null {
   const q = suburbQuery.toLowerCase().trim();
 
@@ -117,11 +122,9 @@ export function getSuburbStats(suburbQuery: string): SuburbStats | null {
   };
 }
 
-/**
- * Get matching suburb names for autocomplete suggestions.
- */
 export function getSuburbSuggestions(query: string): string[] {
   if (!query.trim()) return [];
   const q = query.toLowerCase().trim();
   return HOBART_SUBURBS.filter((s) => s.toLowerCase().includes(q));
 }
+

@@ -1,152 +1,173 @@
+"use client";
+
 import { SearchInput } from "@/components/search-input";
 import MapboxMap from "@/components/MapboxMap";
-import { getRecentDeals, getSuburbStats } from "@/lib/api";
+import { getRecentDealsSync, getSuburbStats } from "@/lib/api";
 import { HOBART_SUBURBS } from "@/lib/data";
 import { PropertyCard } from "@/components/property-card";
+import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/animated-section";
+import { AnimatedCounter } from "@/components/animated-counter";
 import { ArrowRight, Map as MapIcon, TrendingUp, ShieldCheck, BarChart3 } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
+import { useMemo } from "react";
 
-export default async function Home() {
-    const recentProperties = await getRecentDeals();
-    const suburbData = HOBART_SUBURBS.map((suburb) => ({
-        suburb,
-        stats: getSuburbStats(suburb),
-    })).filter((s) => s.stats !== null);
+export default function Home() {
+    const recentProperties = useMemo(() => getRecentDealsSync(), []);
+    const suburbData = useMemo(
+        () =>
+            HOBART_SUBURBS.map((suburb) => ({
+                suburb,
+                stats: getSuburbStats(suburb),
+            })).filter((s) => s.stats !== null),
+        []
+    );
 
     return (
         <div className="flex flex-col gap-12">
             {/* Hero Section */}
-            <section className="relative flex flex-col items-center justify-center text-center gap-8 py-12 md:py-20 z-10">
-                {/* Decorative background glow is handled in layout, but added here for prominence */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/10 rounded-full blur-[100px] -z-10 animate-pulse-slow" />
+            <AnimatedSection>
+                <section className="relative flex flex-col items-center justify-center text-center gap-8 py-12 md:py-20 z-10">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/10 rounded-full blur-[100px] -z-10 animate-pulse-slow" />
 
-                <div className="space-y-4 max-w-4xl mx-auto">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
-                        <span className="relative flex h-2 w-2">
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                        </span>
-                        Live Market Data for Hobart
+                    <div className="space-y-4 max-w-4xl mx-auto">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
+                            <span className="relative flex h-2 w-2">
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                            </span>
+                            Live Market Data for Hobart
+                        </div>
+
+                        <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight font-outfit">
+                            Validating value in <br />
+                            <span className="text-gradient">Hobart, Tasmania</span>
+                        </h1>
+
+                        <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                            Discover accurate property valuations, past sales history, and market insights powered by real-time local data.
+                        </p>
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight font-outfit">
-                        Validating value in <br />
-                        <span className="text-gradient">Hobart, Tasmania</span>
-                    </h1>
-
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                        Discover accurate property valuations, past sales history, and market insights powered by real-time local data.
-                    </p>
-                </div>
-
-                <div className="w-full max-w-2xl mx-auto mt-4 px-4">
-                    <SearchInput />
-                </div>
-            </section>
+                    <div className="w-full max-w-2xl mx-auto mt-4 px-4">
+                        <SearchInput />
+                    </div>
+                </section>
+            </AnimatedSection>
 
             {/* Dashboard / Map Section */}
-            <section className="grid lg:grid-cols-3 gap-8 w-full max-w-[1400px] mx-auto">
-                <div className="lg:col-span-2 space-y-4">
-                    <div className="flex items-center justify-between px-2">
-                        <h2 className="text-2xl font-bold font-outfit flex items-center gap-2">
-                            <MapIcon className="h-6 w-6 text-primary" />
-                            Interactive Market Map
-                        </h2>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-primary" /> Low</span>
-                            <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-muted-foreground" /> High</span>
-                        </div>
-                    </div>
-
-                    <Suspense fallback={<div className="h-[600px] w-full bg-muted/20 animate-pulse rounded-2xl glass-panel" />}>
-                        <MapboxMap properties={recentProperties} />
-                    </Suspense>
-                </div>
-
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between px-1">
-                        <h2 className="text-2xl font-bold font-outfit flex items-center gap-2">
-                            <TrendingUp className="h-6 w-6 text-muted-foreground" />
-                            Recent Valuations
-                        </h2>
-                        <Link href="/search" className="text-sm text-primary hover:underline flex items-center gap-1">
-                            View All <ArrowRight className="h-3 w-3" />
-                        </Link>
-                    </div>
-
-                    <div className="flex flex-col gap-4 h-[600px] overflow-y-auto pr-2 scrollbar-hide pb-4">
-                        {recentProperties.slice(0, 4).map((prop) => (
-                            <div key={prop.id} className="h-[320px]">
-                                <PropertyCard property={prop} />
+            <AnimatedSection delay={0.2}>
+                <section className="grid lg:grid-cols-3 gap-8 w-full max-w-[1400px] mx-auto">
+                    <div className="lg:col-span-2 space-y-4">
+                        <div className="flex items-center justify-between px-2">
+                            <h2 className="text-2xl font-bold font-outfit flex items-center gap-2">
+                                <MapIcon className="h-6 w-6 text-primary" />
+                                Interactive Market Map
+                            </h2>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-primary" /> Low</span>
+                                <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-muted-foreground" /> High</span>
                             </div>
-                        ))}
+                        </div>
+
+                        <MapboxMap properties={recentProperties} />
                     </div>
-                </div>
-            </section>
+
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between px-1">
+                            <h2 className="text-2xl font-bold font-outfit flex items-center gap-2">
+                                <TrendingUp className="h-6 w-6 text-muted-foreground" />
+                                Recent Valuations
+                            </h2>
+                            <Link href="/search" className="text-sm text-primary hover:underline flex items-center gap-1">
+                                View All <ArrowRight className="h-3 w-3" />
+                            </Link>
+                        </div>
+
+                        <StaggerContainer className="flex flex-col gap-4 h-[600px] overflow-y-auto pr-2 scrollbar-hide pb-4">
+                            {recentProperties.slice(0, 4).map((prop) => (
+                                <StaggerItem key={prop.id} className="h-[320px]">
+                                    <PropertyCard property={prop} />
+                                </StaggerItem>
+                            ))}
+                        </StaggerContainer>
+                    </div>
+                </section>
+            </AnimatedSection>
 
             {/* Features Section */}
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mx-auto py-12">
-                <FeatureCard
-                    icon={<TrendingUp className="h-7 w-7 text-primary" />}
-                    title="Real-Time Trends"
-                    description="Live analysis of property values across Hobart's suburbs updated daily."
-                />
-                <FeatureCard
-                    icon={<MapIcon className="h-7 w-7 text-primary" />}
-                    title="Heatmap Analytics"
-                    description="Visualize property prices and investor hotspots on our detailed heatmap."
-                />
-                <FeatureCard
-                    icon={<ShieldCheck className="h-7 w-7 text-primary" />}
-                    title="Verified Data"
-                    description="Sourced directly from reliable government databases and recent sales records."
-                />
-            </section>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mx-auto py-12">
+                <StaggerItem>
+                    <FeatureCard
+                        icon={<TrendingUp className="h-7 w-7 text-primary" />}
+                        title="Real-Time Trends"
+                        description="Live analysis of property values across Hobart's suburbs updated daily."
+                    />
+                </StaggerItem>
+                <StaggerItem>
+                    <FeatureCard
+                        icon={<MapIcon className="h-7 w-7 text-primary" />}
+                        title="Heatmap Analytics"
+                        description="Visualize property prices and investor hotspots on our detailed heatmap."
+                    />
+                </StaggerItem>
+                <StaggerItem>
+                    <FeatureCard
+                        icon={<ShieldCheck className="h-7 w-7 text-primary" />}
+                        title="Verified Data"
+                        description="Sourced directly from reliable government databases and recent sales records."
+                    />
+                </StaggerItem>
+            </StaggerContainer>
 
             {/* Suburb Comparison Table */}
-            <section className="w-full max-w-5xl mx-auto pb-12">
-                <div className="flex items-center gap-2 mb-6 px-1">
-                    <BarChart3 className="h-6 w-6 text-primary" />
-                    <h2 className="text-2xl font-bold font-outfit">Suburb Comparison</h2>
-                </div>
-                <div className="glass-card rounded-xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b border-border/50">
-                                    <th className="text-left px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Suburb</th>
-                                    <th className="text-right px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Median Price</th>
-                                    <th className="text-right px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Listings</th>
-                                    <th className="text-right px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Price Range</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {suburbData.map(({ suburb, stats }) => (
-                                    <tr key={suburb} className="border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors">
-                                        <td className="px-5 py-3.5">
-                                            <Link href={`/search?q=${encodeURIComponent(suburb)}`} className="font-medium text-primary hover:underline">
-                                                {suburb}
-                                            </Link>
-                                        </td>
-                                        <td className="text-right px-5 py-3.5 font-semibold">${stats!.medianPrice.toLocaleString()}</td>
-                                        <td className="text-right px-5 py-3.5 text-muted-foreground">{stats!.totalListings}</td>
-                                        <td className="text-right px-5 py-3.5 text-muted-foreground">
-                                            ${(stats!.priceRange.low / 1000).toFixed(0)}k – ${(stats!.priceRange.high / 1000).toFixed(0)}k
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+            <AnimatedSection delay={0.3}>
+                <section className="w-full max-w-5xl mx-auto pb-12">
+                    <div className="flex items-center gap-2 mb-6 px-1">
+                        <BarChart3 className="h-6 w-6 text-primary" />
+                        <h2 className="text-2xl font-bold font-outfit">Suburb Comparison</h2>
                     </div>
-                </div>
-            </section>
+                    <div className="glass-card rounded-xl overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-border/50">
+                                        <th className="text-left px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Suburb</th>
+                                        <th className="text-right px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Median Price</th>
+                                        <th className="text-right px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Listings</th>
+                                        <th className="text-right px-5 py-3.5 font-semibold text-muted-foreground uppercase tracking-wider text-xs">Price Range</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {suburbData.map(({ suburb, stats }) => (
+                                        <tr key={suburb} className="border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors">
+                                            <td className="px-5 py-3.5">
+                                                <Link href={`/search?q=${encodeURIComponent(suburb)}`} className="font-medium text-primary hover:underline">
+                                                    {suburb}
+                                                </Link>
+                                            </td>
+                                            <td className="text-right px-5 py-3.5 font-semibold">
+                                                <AnimatedCounter target={stats!.medianPrice} prefix="$" />
+                                            </td>
+                                            <td className="text-right px-5 py-3.5 text-muted-foreground">
+                                                <AnimatedCounter target={stats!.totalListings} />
+                                            </td>
+                                            <td className="text-right px-5 py-3.5 text-muted-foreground">
+                                                ${(stats!.priceRange.low / 1000).toFixed(0)}k – ${(stats!.priceRange.high / 1000).toFixed(0)}k
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </AnimatedSection>
         </div>
     );
 }
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
     return (
-        <div className="glass-card p-6 flex flex-col items-center text-center gap-3">
+        <div className="glass-card p-6 flex flex-col items-center text-center gap-3 h-full">
             <div className="p-3 bg-primary/5 rounded-xl">
                 {icon}
             </div>
@@ -155,4 +176,3 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
         </div>
     );
 }
-
