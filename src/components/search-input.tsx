@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { getSuburbSuggestions } from "@/lib/api";
+import { sanitizeSearchQuery } from "@/lib/sanitize";
 
 export function SearchInput({ className }: { className?: string }) {
   const [query, setQuery] = useState("");
@@ -27,7 +28,8 @@ export function SearchInput({ className }: { className?: string }) {
   }, []);
 
   const handleInputChange = (value: string) => {
-    setQuery(value);
+    const sanitized = sanitizeSearchQuery(value);
+    setQuery(sanitized);
     setActiveIndex(-1);
     if (value.trim().length >= 2) {
       const matches = getSuburbSuggestions(value);
@@ -84,6 +86,12 @@ export function SearchInput({ className }: { className?: string }) {
             onFocus={() => {
               if (suggestions.length > 0) setShowSuggestions(true);
             }}
+            maxLength={100}
+            aria-label="Search properties"
+            role="combobox"
+            aria-expanded={showSuggestions}
+            aria-autocomplete="list"
+            autoComplete="off"
             className="w-full h-14 pl-12 pr-32 rounded-full glass-input text-lg placeholder:text-muted-foreground/70"
           />
           <Button

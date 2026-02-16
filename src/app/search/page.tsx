@@ -2,6 +2,7 @@ import { searchProperties, getSuburbStats } from "@/lib/api";
 import { PropertyCard } from "@/components/property-card";
 import { SearchInput } from "@/components/search-input";
 import { ExportButton } from "@/components/export-button";
+import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { TrendingUp, Home, DollarSign, BarChart3 } from "lucide-react";
 
 interface SearchPageProps {
@@ -11,7 +12,8 @@ interface SearchPageProps {
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-    const { q: query = "" } = await searchParams;
+    const { q: rawQuery = "" } = await searchParams;
+    const query = sanitizeSearchQuery(rawQuery);
     const results = await searchProperties(query);
     const suburbStats = query ? getSuburbStats(query) : null;
 
